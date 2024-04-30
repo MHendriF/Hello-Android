@@ -8,6 +8,10 @@ android {
     namespace = "com.mhendrif.myrecyclerview"
     compileSdk = 34
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     defaultConfig {
         applicationId = "com.mhendrif.myrecyclerview"
         minSdk = 24

@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -22,9 +24,13 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mhendrif.jetcoffee.components.CategoryItem
+import com.mhendrif.jetcoffee.components.MenuItem
 import com.mhendrif.jetcoffee.components.Search
 import com.mhendrif.jetcoffee.components.SectionText
+import com.mhendrif.jetcoffee.model.Menu
+import com.mhendrif.jetcoffee.model.dummyBestSellerMenu
 import com.mhendrif.jetcoffee.model.dummyCategory
+import com.mhendrif.jetcoffee.model.dummyMenu
 import com.mhendrif.jetcoffee.ui.theme.JetCoffeeTheme
 
 
@@ -42,10 +48,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun JetCoffeeApp() {
-    Column {
+    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         Banner()
         SectionText(stringResource(R.string.section_category))
         CategoryRow()
+        SectionText(stringResource(R.string.section_favorite_menu))
+        MenuRow(dummyMenu)
+        SectionText(stringResource(R.string.section_best_seller_menu))
+        MenuRow(dummyBestSellerMenu)
     }
 }
 
@@ -84,6 +94,22 @@ fun CategoryRow(
 fun CategoryRowPreview() {
     JetCoffeeTheme {
         CategoryRow()
+    }
+}
+
+@Composable
+fun MenuRow(
+    listMenu: List<Menu>,
+    modifier: Modifier = Modifier
+) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        modifier = modifier
+    ) {
+        items(listMenu, key = { it.title }) { menu ->
+            MenuItem(menu)
+        }
     }
 }
 

@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.mhendrif.frezeeconverter"
+    namespace = "com.mhendrif.freezeconverter"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.mhendrif.frezeeconverter"
+        applicationId = "com.mhendrif.freezeconverter"
         minSdk = 24
         targetSdk = 34
         versionCode = 1

@@ -23,7 +23,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.mhendrif.freezeconverter.ui.theme.FreezeConverterTheme
-import com.mhendrif.frezeeconverter.R
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,9 +30,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FreezeConverterTheme {
-                Column {
-                    StatefulTemperatureInput()
-                    ConverterApp()
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Column {
+                        StatefulTemperatureInput()
+                        ConverterApp()
+                        TwoWayConverterApp()
+                    }
                 }
             }
         }
@@ -67,6 +72,11 @@ fun StatefulTemperatureInput(
 private fun convertToFahrenheit(celsius: String) =
     celsius.toDoubleOrNull()?.let {
         (it * 9 / 5) + 32
+    }.toString()
+
+private fun convertToCelsius(fahrenheit: String) =
+    fahrenheit.toDoubleOrNull()?.let {
+        (it - 32) * 5 / 9
     }.toString()
 
 @Composable
@@ -109,18 +119,72 @@ private fun ConverterApp(
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+enum class Scale(val scaleName: String) {
+    CELSIUS("Celsius"),
+    FAHRENHEIT("Fahrenheit")
 }
+
+@Composable
+fun GeneralTemperatureInput(
+    scale: Scale,
+    input: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier) {
+        OutlinedTextField(
+            value = input,
+            label = { Text(stringResource(R.string.enter_temperature, scale.scaleName)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            onValueChange = onValueChange,
+        )
+    }
+}
+
+@Composable
+private fun TwoWayConverterApp(
+    modifier: Modifier = Modifier,
+) {
+    var celsius by remember { mutableStateOf("") }
+    var fahrenheit by remember { mutableStateOf("") }
+    Column (modifier.padding(16.dp)){
+        Text(
+            text = stringResource(R.string.two_way_converter),
+            style = MaterialTheme.typography.headlineSmall
+        )
+        GeneralTemperatureInput(
+            scale = Scale.CELSIUS,
+            input = celsius,
+            onValueChange = { newInput ->
+                celsius = newInput
+                fahrenheit = convertToFahrenheit(newInput)
+            }
+        )
+        GeneralTemperatureInput(
+            scale = Scale.FAHRENHEIT,
+            input = fahrenheit,
+            onValueChange = { newInput ->
+                fahrenheit = newInput
+                celsius = convertToCelsius(newInput)
+            }
+        )
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun MyAppTemperaturePreview() {
     FreezeConverterTheme {
-        Greeting("Android")
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column {
+                StatefulTemperatureInput()
+                ConverterApp()
+                TwoWayConverterApp()
+            }
+        }
     }
 }

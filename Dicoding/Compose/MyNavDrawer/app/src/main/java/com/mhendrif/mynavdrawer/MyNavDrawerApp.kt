@@ -51,15 +51,10 @@ data class MenuItem(val title: String, val icon: ImageVector)
 
 @Composable
 fun MyNavDrawerApp() {
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
+    val appState = rememberMyNavDrawerState()
 
-    BackPressHandler(enabled = drawerState.isOpen) {
-        scope.launch {
-            drawerState.close()
-        }
+    BackPressHandler(enabled = appState.drawerState.isOpen) {
+        appState.onBackPress()
     }
     val items = listOf(
         MenuItem(
@@ -79,25 +74,17 @@ fun MyNavDrawerApp() {
     val selectedItem = remember { mutableStateOf(items[0]) }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(appState.snackbarHostState) },
         topBar = {
             MyTopBar(
-                onMenuClick = {
-                    scope.launch {
-                        if (drawerState.isClosed) {
-                            drawerState.open()
-                        } else {
-                            drawerState.close()
-                        }
-                    }
-                }
+                onMenuClick = appState::onMenuClick
             )
         },
     ) { paddingValues ->
         ModalNavigationDrawer(
             modifier = Modifier.padding(paddingValues),
-            drawerState = drawerState,
-            gesturesEnabled = drawerState.isOpen,
+            drawerState = appState.drawerState,
+            gesturesEnabled = appState.drawerState.isOpen,
             drawerContent = {
                 ModalDrawerSheet {
                     Spacer(Modifier.height(12.dp))
@@ -107,22 +94,7 @@ fun MyNavDrawerApp() {
                             label = { Text(item.title) },
                             selected = item == selectedItem.value,
                             onClick = {
-                                scope.launch {
-                                    drawerState.close()
-                                    val snackbarResult = snackbarHostState.showSnackbar(
-                                        message = context.resources.getString(R.string.coming_soon, item.title),
-                                        actionLabel = context.resources.getString(R.string.subscribe_question),
-                                        withDismissAction = true,
-                                        duration = SnackbarDuration.Short
-                                    )
-                                    if (snackbarResult == SnackbarResult.ActionPerformed) {
-                                        Toast.makeText(
-                                            context,
-                                            context.resources.getString(R.string.subscribed_info),
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
+                                appState.onItemSelected(item)
                                 selectedItem.value = item
                             },
                             modifier = Modifier.padding(horizontal = 12.dp)
@@ -135,13 +107,7 @@ fun MyNavDrawerApp() {
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        if (drawerState.isClosed) {
-                            stringResource(R.string.swipe_to_open)
-                        } else {
-                            stringResource(R.string.swipe_to_close)
-                        }
-                    )
+                    Text(text = if (appState.drawerState.isClosed) ">>> Swipe to open >>>" else "<<< Swipe to close <<<")
                 }
             }
         )

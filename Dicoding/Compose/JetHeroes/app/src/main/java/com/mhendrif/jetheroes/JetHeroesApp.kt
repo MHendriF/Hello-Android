@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -39,7 +40,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.mhendrif.jetheroes.data.HeroRepository
 import com.mhendrif.jetheroes.model.HeroesData
 import com.mhendrif.jetheroes.ui.theme.JetHeroesTheme
 import kotlinx.coroutines.launch
@@ -49,10 +52,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun JetHeroesApp(
     modifier: Modifier = Modifier,
+    viewModel: JetHeroesViewModel = viewModel(factory = ViewModelFactory(HeroRepository()))
 ) {
-    val groupedHeroes = HeroesData.heroes
-        .sortedBy { it.name }
-        .groupBy { it.name[0] }
+    val groupedHeroes by viewModel.groupedHeroes.collectAsState()
 
     Box(modifier = modifier) {
         val scope = rememberCoroutineScope()
